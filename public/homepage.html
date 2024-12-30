@@ -7,6 +7,45 @@
     <link rel="shortcut icon" href="R.jpg" type="image/x-icon">
     <link rel="stylesheet" href="styles.css"> <!-- Link to your CSS file -->
 </head>
+    <style type="text/css">
+        * {
+            box-sizing: border-box;
+            font-family: cursive;
+            margin: 0;
+            padding: 10px;
+            font-size:auto;
+        }
+
+        body, html {
+            font-family: cursive;
+            background-color: #fffdf7;
+            padding-top: 30px;
+        }
+
+        .flex-container {
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin: 20px 0;
+        }
+
+        .flex-container img {
+            width: 150px;
+            height: 200px;
+            object-fit: cover;
+            margin: 10px;
+            border: 2px solid #3d4122;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            margin-top:30px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+    </style>
 <body>
     <div class="navbar">
         <div class="logo">Recturner</div>
@@ -17,21 +56,15 @@
             <a href="../about.html">About</a>
             <a href="../signup.html">Sign Up</a>          
       </div>
-      <div class="search">
+      <div class="search-container">
           <input type="text" id="search-input" placeholder="Explore New Books">
           <button id="search-btn">Search</button>
           <ul id="suggestions-list"></ul> <!-- Suggestions list -->
       </div>
     </div>
 
-    <h3>Top Rated Books </h3>
+    <h1>Top Rated Books </h1>
     <div class="flex-container" id="top-rated-books"></div>
-
-    <div class="contactus">
-      Contact us
-      <p>+91 9181143298</p>
-    </div>
-
     <script src="script.js"></script> <!-- Link to your JavaScript file -->
 </body>
 </html>
