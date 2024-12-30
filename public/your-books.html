@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recturner - Your Books</title>
+    <link rel="shortcut icon" href="R.jpg" type="image/x-icon">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="navbar">
+        <div class="logo">Recturner</div>
+        <div class="nav-links">
+            <a href="../homepage.html">Home</a>
+            <a href="../profile.html">Profile</a>
+            <a href="../your-books.html">Your Books</a>
+            <a href="../about.html">About</a>
+            <a href="../signup.html">Sign Up</a>
+        </div>
+        <div class="search">
+            <input type="text" id="search-input" placeholder="Explore New Books">
+            <button id="search-btn">Search</button>
+            <ul id="suggestions-list"></ul> <!-- Suggestions list -->
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <h1>Your Books</h1>
+        <div class="book-list" id="your-books-container"></div> <!-- Container for dynamically loaded books -->
+    </div>
+
+    <script src="script.js"></script> <!-- Link to your JavaScript file -->
+</body>
+</html>

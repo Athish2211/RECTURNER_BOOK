@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recturner - Profile</title>
+    <link rel="shortcut icon" href="R.jpg" type="image/x-icon">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="navbar">
+        <div class="logo">Recturner</div>
+        <div class="nav-links">
+            <a href="../homepage.html">Home</a>
+            <a href="../profile.html">Profile</a>
+            <a href="../your-books.html">Your Books</a>
+            <a href="../about.html">About</a>
+            <a href="../signup.html">Sign Up</a>
+        </div>
+        <div class="search-bar">
+            <input type="text" id="search-input" placeholder="Explore New Books">
+            <button id="search-btn">Search</button>
+            <ul id="suggestions-list"></ul> <!-- Suggestions list -->
+        </div>
+    </div>
+
+    <div class="profile-container">
+        <div class="profile-header">
+            <h1>Your Profile</h1>
+        </div>
+        <div class="profile-info" id="profile-info">
+          <!-- User info will be dynamically populated here -->
+          <p><strong>Name:</strong> <span id="user-name">Loading...</span></p>
+          <p><strong>Email:</strong> <span id="user-email">Loading...</span></p>
+          <p><strong>Member Since:</strong> <span id="user-member-since">Loading...</span></p>
+          <p><strong>Books Borrowed:</strong> <span id="user-books-borrowed">Loading...</span></p>
+          <p><strong>Reviews Written:</strong> <span id="user-reviews-written">Loading...</span></p>
+          <a href=# id="signout">Sign Out</a>
+      </div>
+    </div>
+
+    <script src="script.js"></script> <!-- Link to your JavaScript file -->
+    <script>
+        // Function to update profile info from localStorage
+        function updateProfile() {
+            const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+
+            if (!loggedInUser) {
+                alert('You must be logged in to view your profile.');
+                window.location.href = '/login.html'; // Redirect to login if not logged in
+                return;
+            }
+
+            document.getElementById('user-name').textContent = loggedInUser.name || 'N/A';
+            document.getElementById('user-email').textContent = loggedInUser.email || 'N/A';
+            document.getElementById('user-member-since').textContent = new Date(loggedInUser.memberSince).toLocaleDateString() || 'N/A';
+            document.getElementById('user-books-borrowed').textContent = loggedInUser.booksBorrowed || '0';
+            document.getElementById('user-reviews-written').textContent = loggedInUser.reviewsWritten || '0';
+        }
+
+        // Call the updateProfile function when the page loads
+        document.addEventListener('DOMContentLoaded', updateProfile);
+    </script>
+</body>
+</html>
