@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const path = require('path');
 const bookRoutes = require('./routes/bookRoutes');
 const userRoutes = require('./routes/userRoutes');
-const userBooksRoutes = require('./routes/userBookRoutes');
+const userBooksRoutes = require('./routes/userBooksRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 
 const app = express();
@@ -11,7 +11,7 @@ const app = express();
 // Middleware to parse JSON bodies
 app.use(express.json());
 
-// Use routes for books, users, and user-books
+// Use routes for books, users, user-books, and reviews
 app.use('/api/books', bookRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/user-books', userBooksRoutes);
@@ -26,7 +26,10 @@ app.get('/', (req, res) => {
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/recturner_book')
+mongoose.connect('mongodb://localhost:27017/recturner_book', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+})
 .then(() => console.log('MongoDB connected'))
 .catch(err => console.error('MongoDB connection error:', err));
 

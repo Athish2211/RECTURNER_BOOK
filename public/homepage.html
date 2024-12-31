@@ -54,7 +54,9 @@
             <a href="../profile.html">Profile</a>
             <a href="../your-books.html">Your Books</a>
             <a href="../about.html">About</a>
-            <a href="../signup.html">Sign Up</a>          
+            <a href="../signup.html">Sign Up</a>
+            <a href="#" id="logout-btn" class="logout-link">Logout</a> 
+                  
       </div>
       <div class="search-container">
           <input type="text" id="search-input" placeholder="Explore New Books">
@@ -68,5 +70,9 @@
         <div id="books-container" class="flex-container"></div>
     </div>
     <script src="books.js"></script> <!-- Link to your JavaScript file -->
+    <script src="script.js"></script> <!-- Include the script with signOut function -->
+    <script>
+        document.getElementById("logout-btn").addEventListener('click', signOut); // Attach signOut function to button
+    </script>
 </body>
 </html>

@@ -1,5 +1,4 @@
-// Function to handle user login
-document.getElementById('login-form')?.addEventListener('submit', async (event) => {
+document.getElementById('login-form').addEventListener('submit', async (event) => {
     event.preventDefault(); // Prevent default form submission
 
     const email = document.getElementById('email').value.trim();
@@ -16,10 +15,11 @@ document.getElementById('login-form')?.addEventListener('submit', async (event) 
         if (!response.ok) throw new Error('Login failed');
 
         const user = await response.json(); // Assuming this returns user data
+        console.log('Logged in user:', user); // Debugging statement
         localStorage.setItem('loggedInUser', JSON.stringify(user)); // Store user data
 
         alert('Login successful!');
-        window.location.href = '../homepage.html'; // Redirect to homepage after login
+        window.location.href = 'homepage.html'; // Redirect to homepage after login
     } catch (error) {
         console.error('Error during login:', error);
         alert('Login failed. Please try again.');

@@ -213,13 +213,14 @@ async function fetchReviews(bookId) {
 
 // Sign out function
 function signOut() {
-    localStorage.removeItem('loggedInUser');  // Remove user data
     const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
     
     // Also remove books stored for the user
     if (loggedInUser) {
         localStorage.removeItem(`yourBooks-${loggedInUser.email}`); // Remove the user's books
     }
+
+    localStorage.removeItem('loggedInUser');  // Remove user data
 
     // Redirect to login page after sign-out
     window.location.href = '/login.html'; 

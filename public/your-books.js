@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function fetchYourBooks() {
     const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+    console.log('Logged in user:', loggedInUser); // Debugging statement
     if (!loggedInUser) {
         alert('You must be logged in to view your books.');
         window.location.href = '/login.html'; // Redirect to login page if not logged in
@@ -11,10 +12,12 @@ async function fetchYourBooks() {
     }
 
     try {
+        console.log('Fetching books for user:', loggedInUser._id); // Debugging statement
         const response = await fetch(`/api/user-books/${loggedInUser._id}`);
         if (!response.ok) throw new Error('Failed to fetch your books');
 
         const books = await response.json();
+        console.log('Fetched books:', books); // Debugging statement
         displayYourBooks(books);
     } catch (error) {
         console.error('Error fetching your books:', error);
