@@ -1,52 +1,29 @@
 const express = require('express');
-const Review = require('../models/review'); // Import Review model
 const router = express.Router();
+const Review = require('../models/review'); // Import Review model
 
-// Route to create a review
-router.post('/', async (req, res) => {
-    const { bookId, reviewerName, rating, reviewText } = req.body;
-
-    const newReview = new Review({
-        bookId,
-        reviewerName,
-        rating,
-        reviewText
-    });
+// Route to submit a review
+router.post('/reviews', async (req, res) => {
+    const { bookId, reviewer, rating, comment } = req.body;
 
     try {
+        const newReview = new Review({ bookId, reviewer, rating, comment });
         await newReview.save();
-        res.status(201).json({ message: 'Review created successfully!' });
-    } catch (err) {
-        res.status(500).json({ message: 'Error creating review', error: err });
+        res.status(201).json(newReview);
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to submit review', error: error.message });
     }
 });
 
-// Route to get all reviews for a book
-router.get('/:bookId', async (req, res) => {
+// Route to fetch reviews by bookId
+router.get('/reviews/:bookId', async (req, res) => {
     const { bookId } = req.params;
 
     try {
         const reviews = await Review.findReviewsByBook(bookId);
-        res.json(reviews.map(review => review.getReviewDetails()));
-    } catch (err) {
-        res.status(500).json({ message: 'Error fetching reviews', error: err });
-    }
-});
-
-// Route to upvote a review (increase review rating)
-router.post('/:reviewId/upvote', async (req, res) => {
-    const { reviewId } = req.params;
-
-    try {
-        const review = await Review.findById(reviewId);
-        if (review) {
-            await review.upvoteReview();
-            res.json({ message: 'Review upvoted successfully!' });
-        } else {
-            res.status(404).json({ message: 'Review not found' });
-        }
-    } catch (err) {
-        res.status(500).json({ message: 'Error upvoting review', error: err });
+        res.status(200).json(reviews);
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to fetch reviews', error: error.message });
     }
 });
 

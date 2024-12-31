@@ -28,19 +28,4 @@ router.get('/search', async (req, res) => {
     }
 });
 
-// Route: Add a new book
-router.post('/', async (req, res) => {
-    const { title, author, genre, description } = req.body;
-    const book = new Book({ title, author, genre, description });
-
-    try {
-        const newBook = await book.save();
-        res.status(201).json(newBook);
-    } catch (err) {
-        res.status(400).json({ message: err.message });
-    }
-});
-
-// Add other routes as necessary...
-
 module.exports = router;
