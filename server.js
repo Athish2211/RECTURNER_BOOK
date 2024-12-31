@@ -26,12 +26,15 @@ app.get('/', (req, res) => {
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/recturner_book', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-})
+mongoose.connect('mongodb://localhost:27017/recturner_book')
 .then(() => console.log('MongoDB connected'))
 .catch(err => console.error('MongoDB connection error:', err));
+
+app.get('/search', (req, res) => {
+    const query = req.query.query.toLowerCase();
+    const results = books.filter(book => book.title.toLowerCase().includes(query));
+    res.json(results);
+});
 
 // Start the server
 const PORT = process.env.PORT || 5000; // Use environment variable or default port

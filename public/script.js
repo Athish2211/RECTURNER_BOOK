@@ -52,17 +52,21 @@ function displaySearchResults(books) {
 }
 
 // Add search functionality to search button
-if (document.getElementById('search-btn')) {
-    document.getElementById('search-btn').addEventListener('click', () => {
-        const query = document.getElementById('search-input').value.trim();
-        if (query) {
-            console.log('Searching for :',query);
-            window.location.href = `search-page.html?search=${encodeURIComponent(query)}`;
-        } else {
-            alert('Please enter a search term.');
-        }
-    });
-}
+document.getElementById('search-btn').addEventListener('click', function() {
+    const query = document.getElementById('search-input').value;
+    fetch(`/search?query=${encodeURIComponent(query)}`)
+        .then(response => response.json())
+        .then(data => {
+            const suggestionsList = document.getElementById('suggestions-list');
+            suggestionsList.innerHTML = '';
+            data.forEach(book => {
+                const li = document.createElement('li');
+                li.textContent = book.title;
+                suggestionsList.appendChild(li);
+            });
+        })
+        .catch(error => console.error('Error:', error));
+});
 
 // Display "Your Books" on the respective page
 if (window.location.pathname.includes('your-books.html')) {
@@ -95,120 +99,6 @@ if (window.location.pathname.includes('your-books.html')) {
             });
         }
     });
-}
-
-
-// Fetch book details for review page on load
-if (window.location.pathname.includes('review.html')) {
-    document.addEventListener('DOMContentLoaded', fetchBookDetails);
-}
-
-// Function to fetch individual book details for review page
-async function fetchBookDetails() {
-    const bookId = new URLSearchParams(window.location.search).get('id');
-    const thumbnailUrl = new URLSearchParams(window.location.search).get('thumbnail');
-    if (!bookId) return;
-
-    try {
-        const response = await fetch(`https://www.googleapis.com/books/v1/volumes/${bookId}`);
-        if (!response.ok) throw new Error('Network response was not ok');
-
-        const book = await response.json();
-        displayBookDetails(book, thumbnailUrl);
-    } catch (error) {
-        console.error('Error fetching book details:', error);
-    }
-}
-
-// Display book details on the review page
-function displayBookDetails(book, thumbnailUrl) {
-    document.getElementById('book-title').textContent = book.volumeInfo.title;
-    document.getElementById('book-author').textContent = `Author: ${book.volumeInfo.authors?.join(', ') || 'Unknown'}`;
-    document.getElementById('book-rating').textContent = `Rating: ${book.volumeInfo.averageRating || 'N/A'}`;
-    document.getElementById('book-description').textContent = book.volumeInfo.description || 'No description available.';
-
-    // Display the thumbnail on the review page
-    document.getElementById('book-thumbnail').src = thumbnailUrl || 'default-thumbnail.jpg';
-
-    // Add functionality to save book to "Your Books"
-    document.getElementById('want-to-read-btn').addEventListener('click', () => {
-        saveToYourBooks(book);
-        alert(`${book.volumeInfo.title} added to your books.`);
-    });
-
-    // Load existing reviews
-    loadReviews(book.id);
-
-    // Set up review submission
-    document.getElementById('review-form').addEventListener('submit', (event) => {
-        event.preventDefault();
-        submitReview(book.id);
-    });
-}
-
-// Load and display reviews
-function loadReviews(bookId) {
-    const reviews = JSON.parse(localStorage.getItem(`reviews-${bookId}`)) || [];
-    const reviewList = document.getElementById('review-list');
-    reviewList.innerHTML = '';
-
-    reviews.forEach(review => {
-        const reviewItem = document.createElement('div');
-        reviewItem.className = 'review-item';
-        reviewItem.innerHTML = `<p>${review.text}</p><p>Rating: ${review.rating}</p><p>By: ${review.user}</p>`;
-        reviewList.appendChild(reviewItem);
-    });
-}
-
-document.getElementById('review-form').addEventListener('submit', async (event) => {
-    event.preventDefault();
-
-    const bookId = document.getElementById('bookId').value.trim();
-    const reviewer = document.getElementById('reviewer').value.trim();
-    const rating = document.getElementById('rating').value.trim();
-    const comment = document.getElementById('comment').value.trim();
-    const reviewData = { bookId, reviewer, rating, comment };
-
-    try {
-        const response = await fetch('/api/reviews', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(reviewData),
-        });
-
-        if (!response.ok) throw new Error('Failed to submit review');
-
-        alert('Review submitted successfully!');
-        fetchReviews(bookId); // Fetch and display reviews after submission
-    } catch (error) {
-        console.error('Error submitting review:', error);
-        alert('Failed to submit review. Please try again.');
-    }
-});
-
-async function fetchReviews(bookId) {
-    try {
-        const response = await fetch(`/api/reviews/${bookId}`);
-        if (!response.ok) throw new Error('Failed to fetch reviews');
-
-        const reviews = await response.json();
-        const reviewsList = document.getElementById('reviews-list');
-        reviewsList.innerHTML = ''; // Clear existing reviews
-
-        reviews.forEach(review => {
-            const reviewElement = document.createElement('div');
-            reviewElement.classList.add('review');
-            reviewElement.innerHTML = `
-                <p><strong>Reviewer:</strong> ${review.reviewer}</p>
-                <p><strong>Rating:</strong> ${review.rating}</p>
-                <p><strong>Comment:</strong> ${review.comment}</p>
-            `;
-            reviewsList.appendChild(reviewElement);
-        });
-    } catch (error) {
-        console.error('Error fetching reviews:', error);
-        alert('Failed to fetch reviews. Please try again.');
-    }
 }
 
 // Sign out function
