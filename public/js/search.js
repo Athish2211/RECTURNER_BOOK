@@ -1,24 +1,33 @@
 document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('search-btn').addEventListener('click', searchBooks);
+    document.getElementById('search-btn').addEventListener('click', handleSearch);
     document.getElementById('search-input').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
-            searchBooks();
+            handleSearch();
         }
     });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const query = urlParams.get('search');
+    if (query) {
+        searchBooks(query);
+    }
 });
 
-// Function to search for books
-async function searchBooks() {
+function handleSearch() {
     const query = document.getElementById('search-input').value.trim();
     if (!query) {
         alert('Please enter a search term.');
         return;
     }
 
-    const apiKey = 'AIzaSyB_cCice-LLGG8DHOJsMLTgEFb45moca80';
+    // Redirect to the homepage with the search query as a URL parameter
+    window.location.href = `homepage.html?search=${encodeURIComponent(query)}`;
+}
 
+// Function to search for books
+async function searchBooks(query) {
     try {
-        const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=10&key=${apiKey}`);
+        const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=12`);
         if (!response.ok) throw new Error('Network response was not ok');
 
         const data = await response.json();
@@ -68,7 +77,6 @@ function displaySearchResults(books) {
     });
 }
 
-// Function to save a book to the user's list
 async function addToWantToRead(book) {
     const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
 

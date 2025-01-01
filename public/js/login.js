@@ -24,7 +24,7 @@ document.getElementById('login-form').addEventListener('submit', async (event) =
         localStorage.setItem('loggedInUser', JSON.stringify(user)); // Store user data
 
         alert('Login successful!');
-        window.location.href = '/homepage.html'; // Redirect to homepage after login
+        window.location.href = '/pages/homepage.html'; // Redirect to homepage after login
     } catch (error) {
         console.error('Error during login:', error);
         alert('Login failed. Please try again.');

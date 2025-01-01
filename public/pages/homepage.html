@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Recturner - Home</title>
+    <link rel="shortcut icon" href="R.jpg" type="image/x-icon">
+    <link rel="stylesheet" href="../css/styles.css"> <!-- Link to your CSS file -->
+</head>
+<body>
+    <div class="navbar">
+        <a href="../pages/homepage.html"><div class="logo">Recturner</div></a>
+        <div class="nav-links">
+            <a href="../pages/homepage.html">Home</a>
+            <a href="../pages/profile.html">Profile</a>
+            <a href="../pages/your-books.html">Your Books</a>
+            <a href="../pages/about.html">About</a>
+            <a href="../pages/signup.html">Sign Up</a>
+            <a href="#" id="logout-btn" class="logout-link">Logout</a> 
+        </div>
+        <div class="search-container">
+          <input type="text" id="search-input" placeholder="Explore New Books">
+          <button id="search-btn">Search</button>
+          <ul id="suggestions-list"></ul> <!-- Suggestions list -->
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>Top Rated Books</h1>
+        <div id="books-container" class="flex-container"></div>
+    </div>
+
+    <script src="../js/books.js"></script> <!-- Link to your JavaScript file -->
+    <script src="../js/search.js"></script>
+    <script>
+        document.getElementById("logout-btn").addEventListener('click', signOut); // Attach signOut function to button
+
+        function signOut() {
+            // Clear the logged-in user data from localStorage
+            localStorage.removeItem('loggedInUser');
+            
+            // Redirect to the login page
+            window.location.href = '/pages/login.html';
+        }
+    </script>
+</body>
+</html>

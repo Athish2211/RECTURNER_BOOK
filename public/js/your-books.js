@@ -7,7 +7,7 @@ async function fetchYourBooks() {
     console.log('Logged in user:', loggedInUser); // Debugging statement
     if (!loggedInUser) {
         alert('You must be logged in to view your books.');
-        window.location.href = '/login.html'; // Redirect to login page if not logged in
+        window.location.href = '/pages/login.html'; // Redirect to login page if not logged in
         return;
     }
 

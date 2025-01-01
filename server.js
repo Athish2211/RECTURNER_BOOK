@@ -16,10 +16,35 @@ app.use('/api/users', userRoutes);
 app.use('/api/user-books', userBooksRoutes);
 app.use('/api/reviews', reviewRoutes);
 
-// Serve the homepage at the root route (localhost:5000)
+
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public','signup.html')); // Update the path if necessary
+    res.sendFile(path.join(__dirname, 'public','pages','signup.html')); // Update the path if necessary
 });
+
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'pages', 'login.html'));
+});
+
+// Serve the homepage
+app.get('/homepage', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'pages', 'homepage.html'));
+});
+
+// Serve the review page
+app.get('/review', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'pages', 'review.html'));
+});
+
+// Serve the your-books page
+app.get('/your-books', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'pages', 'your-books.html'));
+});
+
+// Serve the about page
+app.get('/about', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'pages', 'about.html'));
+});
+
 
 // Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));

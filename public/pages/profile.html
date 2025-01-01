@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recturner - Profile</title>
+    <link rel="shortcut icon" href="R.jpg" type="image/x-icon">
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .profile-container {
+            margin: 80px auto;
+            max-width: 800px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        .profile-header {
+            text-align: center;
+            color: #3d4122;
+        }
+
+        .profile-header h1 {
+            font-size: 30px;
+        }
+
+        .profile-info {
+            margin-top: 20px;
+        }
+
+        .profile-info p {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .profile-info strong {
+            color: #3d4122;
+        }
+        a{
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <a href="../pages/homepage.html"><div class="logo">Recturner</div></a>
+        <div class="nav-links">
+            <a href="../pages/homepage.html">Home</a>
+            <a href="../pages/profile.html">Profile</a>
+            <a href="../pages/your-books.html">Your Books</a>
+            <a href="../pages/about.html">About</a>
+            <a href="../pages/signup.html">Sign Up</a>
+        </div>
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="Explore New Books">
+            <button id="search-btn">Search</button>
+            <ul id="suggestions-list"></ul> <!-- Suggestions list -->
+        </div>
+    </div>
+
+    <div class="profile-container">
+        <div class="profile-header">
+            <h1>Your Profile</h1>
+        </div>
+        <div class="profile-info" id="profile-info">
+          <!-- User info will be dynamically populated here -->
+          <p><strong>Name:</strong> <span id="user-name">Loading...</span></p>
+          <p><strong>Email:</strong> <span id="user-email">Loading...</span></p>
+      </div>
+    </div>
+
+    <script src="../js/search.js"></script>
+    <script src="../js/script.js"></script> <!-- Link to your JavaScript file -->
+    <script>
+        // Function to update profile info from localStorage
+        function updateProfile() {
+            const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+
+            if (!loggedInUser) {
+                alert('You must be logged in to view your profile.');
+                window.location.href = '/login.html'; // Redirect to login if not logged in
+                return;
+            }
+
+            document.getElementById('user-name').textContent = loggedInUser.name || 'N/A';
+            document.getElementById('user-email').textContent = loggedInUser.email || 'N/A';
+        }
+
+        // Call the updateProfile function when the page loads
+        document.addEventListener('DOMContentLoaded', updateProfile);
+    </script>
+</body>
+</html>
