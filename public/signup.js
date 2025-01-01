@@ -29,7 +29,7 @@ document.getElementById('signup-form').addEventListener('submit', async (event) 
         }
 
         alert('Signup successful! You can now log in.');
-        window.location.href = '/login.html'; // Redirect to login page after successful signup
+        window.location.href = '../pages/login.html'; // Redirect to login page after successful signup
     } catch (error) {
         console.error('Error during signup:', error);
         alert(`Signup failed: ${error.message}`);

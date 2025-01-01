@@ -8,7 +8,6 @@ const reviewRoutes = require('./routes/reviewRoutes');
 
 const app = express();
 
-// Middleware to parse JSON bodies
 app.use(express.json());
 
 // Use routes for books, users, user-books, and reviews
@@ -19,7 +18,7 @@ app.use('/api/reviews', reviewRoutes);
 
 // Serve the homepage at the root route (localhost:5000)
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'homepage.html')); // Update the path if necessary
+    res.sendFile(path.join(__dirname, 'public','signup.html')); // Update the path if necessary
 });
 
 // Serve static files from the 'public' directory
@@ -29,12 +28,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 mongoose.connect('mongodb://localhost:27017/recturner_book')
 .then(() => console.log('MongoDB connected'))
 .catch(err => console.error('MongoDB connection error:', err));
-
-app.get('/search', (req, res) => {
-    const query = req.query.query.toLowerCase();
-    const results = books.filter(book => book.title.toLowerCase().includes(query));
-    res.json(results);
-});
 
 // Start the server
 const PORT = process.env.PORT || 5000; // Use environment variable or default port

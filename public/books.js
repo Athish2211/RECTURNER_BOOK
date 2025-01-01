@@ -1,5 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
     fetchBooksFromGoogle();
+
+    document.getElementById('search-btn').addEventListener('click', searchBooks);
+    document.getElementById('search-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            searchBooks();
+        }
+    });
 });
 
 // Function to fetch books for the homepage from multiple genres
@@ -10,7 +17,7 @@ async function fetchBooksFromGoogle() {
 
     try {
         for (const genre of genres) {
-            const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(genre)}&maxResults=10&key=${apiKey}`);
+            const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(genre)}&maxResults=8&key=${apiKey}`);
             if (!response.ok) throw new Error('Network response was not ok');
 
             const data = await response.json();
@@ -109,4 +116,10 @@ async function addToWantToRead(book) {
         console.error('Error saving book:', error);
         alert('Failed to save book. Please try again.');
     }
+}
+
+// Function to sign out the user
+function signOut() {
+    localStorage.removeItem('loggedInUser');
+    window.location.href = 'login.html'; // Redirect to login page
 }

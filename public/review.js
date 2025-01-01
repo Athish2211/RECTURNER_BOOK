@@ -30,7 +30,6 @@ async function fetchBookDetails(bookId) {
         displayBookDetails(book);
     } catch (error) {
         console.error('Error fetching book details:', error);
-        
         alert('Failed to load book details. Please try again.');
     }
 }
@@ -46,7 +45,6 @@ function displayBookDetails(book) {
     document.getElementById('book-author').textContent = `Author: ${book.volumeInfo.authors?.join(', ') || 'Unknown'}`;
     document.getElementById('book-rating').textContent = `Rating: ${book.volumeInfo.averageRating || 'N/A'}`;
     document.getElementById('book-description').textContent = stripHtmlTags(book.volumeInfo.description || 'No description available.');
-    document.getElementById('book-details').textContent = `Published: ${book.volumeInfo.publishedDate || 'Unknown'}`;
     loadReviews(book.id);
 }
 
