@@ -45,8 +45,6 @@ app.get('/about', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'pages', 'about.html'));
 });
 
-
-// Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Connect to MongoDB
@@ -55,7 +53,7 @@ mongoose.connect('mongodb://localhost:27017/recturner_book')
 .catch(err => console.error('MongoDB connection error:', err));
 
 // Start the server
-const PORT = process.env.PORT || 5000; // Use environment variable or default port
+const PORT = process.env.PORT || 5001; // Use environment variable or default port
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });

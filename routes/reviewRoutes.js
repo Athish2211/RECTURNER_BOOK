@@ -1,20 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Review = require('../models/Review');
-
-// Route to post a review
-router.post('/', async (req, res) => {
-    const { bookId, userId, reviewText, rating } = req.body;
-
-    try {
-        const newReview = new Review({ bookId, userId, reviewText, rating });
-        await newReview.save();
-        res.status(201).json(newReview);
-    } catch (error) {
-        console.error('Error posting review:', error);
-        res.status(500).json({ message: 'Failed to post review', error: error.message });
-    }
-});
+const Review = require('../models/review'); // Assuming you have a Review model
 
 // Route to get reviews for a book
 router.get('/', async (req, res) => {
@@ -29,21 +15,57 @@ router.get('/', async (req, res) => {
     }
 });
 
-// Route to upvote a review
-router.post('/upvote/:id', async (req, res) => {
-    const { id } = req.params;
+// Route to post a new review
+router.post('/', async (req, res) => {
+    const { bookId, reviewText, rating, userId } = req.body;
 
     try {
-        const review = await Review.findById(id);
+        const newReview = new Review({
+            bookId,
+            reviewText,
+            rating,
+            userId,
+            upvotes: 0,
+            upvotedBy: []
+        });
+
+        await newReview.save();
+        res.status(201).json(newReview);
+    } catch (error) {
+        console.error('Error posting review:', error);
+        res.status(500).json({ message: 'Failed to post review', error: error.message });
+    }
+});
+
+// Upvote route
+router.post('/upvote/:id', async (req, res) => {
+    const reviewId = req.params.id;
+    const userId = req.body.userId;
+
+    try {
+        const review = await Review.findById(reviewId);
         if (!review) {
             return res.status(404).json({ message: 'Review not found' });
         }
 
-        await review.upvoteReview();
-        res.status(200).json(review);
+        if (!Array.isArray(review.upvotedBy)) {
+            review.upvotedBy = [];
+        }
+        
+        // Check if the user has already upvoted this review
+        if (review.upvotedBy.includes(userId)) {
+            return res.status(400).json({ message: 'You have already upvoted this review' });
+        }
+
+        // Add the user ID to the list of upvoters and increment the upvote count
+        review.upvotedBy.push(userId);
+        review.upvotes += 1;
+        await review.save();
+
+        res.json({ message: 'Review upvoted successfully' });
     } catch (error) {
         console.error('Error upvoting review:', error);
-        res.status(500).json({ message: 'Failed to upvote review', error: error.message });
+        res.status(500).json({ message: 'Internal server error', error: error.message });
     }
 });
 

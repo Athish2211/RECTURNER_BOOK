@@ -69,32 +69,39 @@ function displaySearchResults(books) {
         });
 
         bookItem.querySelector('.want-to-read-btn').addEventListener('click', () => {
-            console.log(`Want to Read button clicked for book: ${book.volumeInfo.title}`);
-            addToWantToRead(book);
+            const bookData = {
+                bookId: book.id,
+                title: book.volumeInfo.title,
+                authors: book.volumeInfo.authors,
+                thumbnail: thumbnailUrl
+            };
+            addToWantToRead(bookData);
         });
 
         booksContainer.appendChild(bookItem);
     });
 }
 
+// Function to add a book to the user's "Want to Read" list
 async function addToWantToRead(book) {
     const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
 
     if (!loggedInUser) {
         alert('You must be logged in to add books to your list.');
-        window.location.href = '/login.html'; // Redirect to login page if not logged in
+        window.location.href = '/pages/login.html'; // Redirect to login page if not logged in
         return;
     }
 
     const userBook = {
         userId: loggedInUser._id,
-        bookId: book.id,
-        title: book.volumeInfo.title,
-        authors: book.volumeInfo.authors?.join(', ') || 'Unknown',
-        thumbnail: book.volumeInfo.imageLinks?.thumbnail || 'default-thumbnail.jpg'
+        bookId: book.bookId,
+        title: book.title,
+        authors: book.authors,
+        thumbnail: book.thumbnail
     };
 
     try {
+        console.log('Sending request to add book:', userBook); // Log the request data
         const response = await fetch('/api/user-books', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -103,7 +110,7 @@ async function addToWantToRead(book) {
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('Error response:', errorText); // Debugging statement
+            console.error('Error response:', errorText); // Log the error response
             throw new Error('Failed to save book');
         }
 

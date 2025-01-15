@@ -123,8 +123,14 @@ function displaySearchResults(books) {
         });
 
         bookItem.querySelector('.want-to-read-btn').addEventListener('click', () => {
-            console.log(`Want to Read button clicked for book: ${book.volumeInfo.title}`);
-            addToWantToRead(book);
+            const bookData = {
+                bookId: book.id,
+                title: book.volumeInfo.title,
+                authors: book.volumeInfo.authors,
+                thumbnail: thumbnailUrl
+            };
+            addToWantToRead(bookData);
+            
         });
 
         booksContainer.appendChild(bookItem);
@@ -136,7 +142,7 @@ async function addToWantToRead(book) {
 
     if (!loggedInUser) {
         alert('You must be logged in to add books to your list.');
-        window.location.href = '/login.html'; // Redirect to login page if not logged in
+        window.location.href = '/pages/login.html'; // Redirect to login page if not logged in
         return;
     }
 

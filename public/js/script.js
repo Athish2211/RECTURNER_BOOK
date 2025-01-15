@@ -4,7 +4,7 @@ if (window.location.pathname.includes('your-books.html')) {
         const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
         if (!loggedInUser) {
             alert('You must be logged in to view your books.');
-            window.location.href = '/login.html'; // Redirect to login if not logged in
+            window.location.href = '/pages/login.html'; // Redirect to login if not logged in
             return;
         }
 
@@ -43,5 +43,5 @@ function signOut() {
     localStorage.removeItem('loggedInUser');  // Remove user data
 
     // Redirect to login page after sign-out
-    window.location.href = '/login.html'; 
+    window.location.href = '/pages/login.html'; 
 }

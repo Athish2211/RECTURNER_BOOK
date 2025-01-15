@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recturner - Profile</title>
-    <link rel="shortcut icon" href="R.jpg" type="image/x-icon">
+    <link rel="shortcut icon" href="../images/R.jpg" type="image/x-icon">
     <link rel="stylesheet" href="../css/styles.css">
     <style>
         .profile-container {
@@ -66,22 +66,20 @@
             <h1>Your Profile</h1>
         </div>
         <div class="profile-info" id="profile-info">
-          <!-- User info will be dynamically populated here -->
           <p><strong>Name:</strong> <span id="user-name">Loading...</span></p>
           <p><strong>Email:</strong> <span id="user-email">Loading...</span></p>
       </div>
     </div>
 
     <script src="../js/search.js"></script>
-    <script src="../js/script.js"></script> <!-- Link to your JavaScript file -->
+    <script src="../js/script.js"></script> 
     <script>
-        // Function to update profile info from localStorage
         function updateProfile() {
             const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
 
             if (!loggedInUser) {
                 alert('You must be logged in to view your profile.');
-                window.location.href = '/login.html'; // Redirect to login if not logged in
+                window.location.href = '/pages/login.html'; 
                 return;
             }
 
@@ -89,7 +87,6 @@
             document.getElementById('user-email').textContent = loggedInUser.email || 'N/A';
         }
 
-        // Call the updateProfile function when the page loads
         document.addEventListener('DOMContentLoaded', updateProfile);
     </script>
 </body>
