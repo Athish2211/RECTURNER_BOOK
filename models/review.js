@@ -5,7 +5,8 @@ const reviewSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
     reviewText: { type: String, required: true },
     rating: { type: Number, required: true, min: 1, max: 5 },
-    upvotes: { type: Number, default: 0 }, // Add upvotes field
+    upvotes: { type: Number, default: 0 },
+    upvotedBy: { type: [mongoose.Schema.Types.ObjectId], default: [] },
     createdAt: { type: Date, default: Date.now }
 });
 

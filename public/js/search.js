@@ -24,19 +24,19 @@ function handleSearch() {
     window.location.href = `homepage.html?search=${encodeURIComponent(query)}`;
 }
 
-// Function to search for books
+// Function to search for books (via server proxy)
 async function searchBooks(query) {
     try {
-        const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=12`);
-        if (!response.ok) throw new Error('Network response was not ok');
-
+        const response = await fetch(`/api/books/google?q=${encodeURIComponent(query)}&maxResults=12`);
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({ message: response.statusText }));
+            throw new Error(err.message || 'Network response was not ok');
+        }
         const data = await response.json();
-        const books = data.items || [];
-
-        displaySearchResults(books); // Display search results
+        displaySearchResults(data.items || []);
     } catch (error) {
         console.error('Error searching for books:', error);
-        alert('Failed to search for books. Please try again.');
+        alert(error.message || 'Failed to search for books. Please try again.');
     }
 }
 
@@ -87,21 +87,20 @@ async function addToWantToRead(book) {
     const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
 
     if (!loggedInUser) {
-        alert('You must be logged in to add books to your list.');
-        window.location.href = '/pages/login.html'; // Redirect to login page if not logged in
+        window.location.replace('/pages/login.html');
         return;
     }
 
+    const authors = book.authors;
     const userBook = {
         userId: loggedInUser._id,
-        bookId: book.bookId,
-        title: book.title,
-        authors: book.authors,
-        thumbnail: book.thumbnail
+        bookId: book.bookId || book.id,
+        title: book.title || 'Unknown',
+        authors: Array.isArray(authors) ? authors : (authors ? [String(authors)] : ['Unknown']),
+        thumbnail: book.thumbnail || 'default-thumbnail.jpg'
     };
 
     try {
-        console.log('Sending request to add book:', userBook); // Log the request data
         const response = await fetch('/api/user-books', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -109,14 +108,13 @@ async function addToWantToRead(book) {
         });
 
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Error response:', errorText); // Log the error response
-            throw new Error('Failed to save book');
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.message || 'Failed to save book');
         }
 
         alert(`${userBook.title} added to your books.`);
     } catch (error) {
         console.error('Error saving book:', error);
-        alert('Failed to save book. Please try again.');
+        alert(error.message || 'Failed to save book. Please try again.');
     }
 }

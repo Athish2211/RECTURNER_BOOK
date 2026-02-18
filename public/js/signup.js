@@ -22,9 +22,12 @@ document.getElementById('signup-form').addEventListener('submit', async (event) 
         });
 
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Error response:', errorText); 
-            throw new Error(errorText || 'Sign-up failed');
+            const contentType = response.headers.get('Content-Type');
+            const message = contentType && contentType.includes('application/json')
+                ? (await response.json()).message || 'Sign-up failed'
+                : await response.text() || 'Sign-up failed';
+            console.error('Error response:', message);
+            throw new Error(message);
         }
 
         alert('Signup successful! You can now log in.');

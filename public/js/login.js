@@ -19,9 +19,11 @@ document.getElementById('login-form').addEventListener('submit', async (event) =
             throw new Error(errorData.message || 'Login failed');
         }
 
-        const user = await response.json(); // Assuming this returns user data
-        console.log('Logged in user:', user); // Debugging statement
-        localStorage.setItem('loggedInUser', JSON.stringify(user)); // Store user data
+        const data = await response.json();
+        const user = data.user || data; // support both { user } and plain user
+        if (!user || !user._id) throw new Error('Invalid login response');
+        console.log('Logged in user:', user);
+        localStorage.setItem('loggedInUser', JSON.stringify(user)); // Store user object (name, email, _id)
 
         alert('Login successful!');
         window.location.href = '/pages/homepage.html'; // Redirect to homepage after login

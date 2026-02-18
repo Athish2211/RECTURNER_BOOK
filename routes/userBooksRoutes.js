@@ -20,7 +20,7 @@ router.post('/', async (req, res) => {
         res.status(201).json(newUserBook);
     } catch (error) {
         console.error('Error saving book:', error);
-        res.status(500).json({ message: 'Failed to save book', error: error.message });
+        res.status(400).json({ message: error.message || 'Failed to save book' });
     }
 });
 

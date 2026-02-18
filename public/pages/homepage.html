@@ -8,6 +8,9 @@
     <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
+    <script>
+        (function(){ if (!localStorage.getItem('loggedInUser')) { window.location.replace('/pages/login.html'); return; } })();
+    </script>
     <div class="navbar">
         <a href="../pages/homepage.html"><div class="logo">Recturner</div></a>
         <div class="nav-links">
@@ -36,12 +39,12 @@
         document.getElementById("logout-btn").addEventListener('click', signOut); // Attach signOut function to button
 
         function signOut() {
-            // Clear the logged-in user data from localStorage
             localStorage.removeItem('loggedInUser');
-            
-            // Redirect to the login page
-            window.location.href = '/pages/login.html';
+            window.location.replace('/pages/login.html');
         }
+        window.addEventListener('pageshow', function(e) {
+            if (!localStorage.getItem('loggedInUser')) window.location.replace('/pages/login.html');
+        });
     </script>
 </body>
 </html>

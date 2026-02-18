@@ -12,13 +12,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     stars.forEach(star => {
         star.addEventListener('click', () => {
-            selectedRating = star.getAttribute('data-value');
-            stars.forEach(s => s.classList.remove('selected'));
-            star.classList.add('selected');
+            selectedRating = Number(star.getAttribute('data-value')) || 0;
+            stars.forEach(s => {
+                s.classList.remove('selected');
+                if (Number(s.getAttribute('data-value')) <= selectedRating) s.classList.add('selected');
+            });
         });
     });
 
-    document.getElementById('post-review-btn').addEventListener('click', () => postReview(bookId, selectedRating));
+    document.getElementById('post-review-btn').addEventListener('click', () => {
+        const rating = Number(selectedRating) || 0;
+        if (rating < 1 || rating > 5) {
+            alert('Please select a star rating (1-5) before posting.');
+            return;
+        }
+        postReview(bookId, rating);
+    });
     document.getElementById('want-to-read-btn').addEventListener('click', addToWantToRead);
 });
 
@@ -28,24 +37,38 @@ function stripHtmlTags(str) {
 }
 
 function displayBookDetails(book) {
-    document.getElementById('book-thumbnail').src = book.volumeInfo.imageLinks?.thumbnail || 'default-thumbnail.jpg';
-    document.getElementById('book-title').textContent = book.volumeInfo.title;
-    document.getElementById('book-author').textContent = `Author: ${book.volumeInfo.authors?.join(', ') || 'Unknown'}`;
-    document.getElementById('book-rating').textContent = `Rating: ${book.volumeInfo.averageRating || 'N/A'}`;
-    document.getElementById('book-description').textContent = stripHtmlTags(book.volumeInfo.description || 'No description available.');
+    const v = book.volumeInfo || {};
+    const thumb = document.getElementById('book-thumbnail');
+    const titleEl = document.getElementById('book-title');
+    const authorEl = document.getElementById('book-author');
+    const ratingEl = document.getElementById('book-rating');
+    const descEl = document.getElementById('book-description');
+    if (thumb) thumb.src = v.imageLinks?.thumbnail || 'default-thumbnail.jpg';
+    if (titleEl) titleEl.textContent = v.title || 'Unknown';
+    if (authorEl) authorEl.textContent = 'Author: ' + (v.authors?.length ? v.authors.join(', ') : 'Unknown');
+    if (ratingEl) ratingEl.textContent = 'Rating: ' + (v.averageRating != null ? v.averageRating : 'N/A');
+    if (descEl) descEl.textContent = stripHtmlTags(v.description || 'No description available.');
     loadReviews(book.id);
 }
 
 async function fetchBookDetails(bookId) {
+    if (!bookId) {
+        document.getElementById('book-description').textContent = 'No book selected.';
+        return;
+    }
     try {
-        const response = await fetch(`https://www.googleapis.com/books/v1/volumes/${bookId}`);
-        if (!response.ok) throw new Error('Network response was not ok');
-
+        const response = await fetch(`/api/books/google/volume?volumeId=${encodeURIComponent(bookId)}`);
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({ message: response.statusText }));
+            throw new Error(err.message || 'Failed to load book details');
+        }
         const book = await response.json();
         displayBookDetails(book);
     } catch (error) {
         console.error('Error fetching book details:', error);
-        alert('Failed to fetch book details. Please try again.');
+        const descEl = document.getElementById('book-description');
+        if (descEl) descEl.textContent = 'Could not load this book. ' + (error.message || 'Please try again.');
+        if (document.getElementById('review-list')) document.getElementById('review-list').innerHTML = '';
     }
 }
 
@@ -54,25 +77,27 @@ async function addToWantToRead() {
     const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
 
     if (!loggedInUser) {
-        alert('You must be logged in to add books to your list.');
-        window.location.href = '/pages/login.html'; // Redirect to login page if not logged in
+        window.location.replace('/pages/login.html');
         return;
     }
 
     try {
-        const response = await fetch(`https://www.googleapis.com/books/v1/volumes/${bookId}`);
-        if (!response.ok) throw new Error('Network response was not ok');
-
+        const response = await fetch(`/api/books/google/volume?volumeId=${encodeURIComponent(bookId)}`);
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({ message: response.statusText }));
+            throw new Error(err.message || 'Failed to load book');
+        }
         const book = await response.json();
+        const v = book.volumeInfo || {};
+        const authors = v.authors;
         const userBook = {
             userId: loggedInUser._id,
             bookId: book.id,
-            title: book.volumeInfo.title,
-            authors: book.volumeInfo.authors,
-            thumbnail: book.volumeInfo.imageLinks?.thumbnail || 'default-thumbnail.jpg'
+            title: v.title || 'Unknown',
+            authors: Array.isArray(authors) ? authors : (authors ? [String(authors)] : ['Unknown']),
+            thumbnail: v.imageLinks?.thumbnail || 'default-thumbnail.jpg'
         };
 
-        console.log('Sending request to add book:', userBook); // Log the request data
         const addResponse = await fetch('/api/user-books', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -80,9 +105,8 @@ async function addToWantToRead() {
         });
 
         if (!addResponse.ok) {
-            const errorText = await addResponse.text();
-            console.error('Error response:', errorText); // Log the error response
-            throw new Error('Failed to save book');
+            const err = await addResponse.json().catch(() => ({}));
+            throw new Error(err.message || 'Failed to save book');
         }
 
         alert(`${userBook.title} added to your books.`);
@@ -140,22 +164,26 @@ async function postReview(bookId, selectedRating) {
 
 // Function to load reviews for a book
 async function loadReviews(bookId) {
+    if (!bookId) return;
     try {
-        const response = await fetch(`/api/reviews/${bookId}`);
+        const response = await fetch(`/api/reviews?bookId=${encodeURIComponent(bookId)}`);
         if (!response.ok) throw new Error('Network response was not ok');
 
         const reviews = await response.json();
         displayReviews(reviews);
     } catch (error) {
         console.error('Error loading reviews:', error);
-        alert('Failed to load reviews. Please try again.');
+        document.getElementById('review-list').innerHTML = '<p>Failed to load reviews. Please try again.</p>';
     }
 }
 
 // Function to display reviews
 function displayReviews(reviews) {
-    const reviewsContainer = document.getElementById('reviews-container');
-    reviewsContainer.innerHTML = ''; // Clear previous reviews
+    const reviewsContainer = document.getElementById('review-list');
+    if (!reviewsContainer) return;
+    reviewsContainer.innerHTML = '';
+    const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+    const currentUserId = loggedInUser ? String(loggedInUser._id) : '';
 
     if (!reviews.length) {
         reviewsContainer.innerHTML = '<p>No reviews yet. Be the first to review this book!</p>';
@@ -165,14 +193,15 @@ function displayReviews(reviews) {
     reviews.forEach(review => {
         const reviewItem = document.createElement('div');
         reviewItem.classList.add('review-item');
-
+        const isOwnReview = currentUserId && String(review.userId) === currentUserId;
         reviewItem.innerHTML = `
             <p><strong>Rating:</strong> ${review.rating}</p>
             <p><strong>Review:</strong> ${review.reviewText}</p>
+            ${review.upvotes != null ? `<p><strong>Upvotes:</strong> ${review.upvotes}</p>` : ''}
+            ${isOwnReview ? '<span class="own-review-label">(Your review)</span>' : '<button type="button" class="upvote-btn">Upvote</button>'}
         `;
-
-        reviewItem.querySelector('.upvote-btn').addEventListener('click', () => upvoteReview(review._id));
-
+        const upvoteBtn = reviewItem.querySelector('.upvote-btn');
+        if (upvoteBtn) upvoteBtn.addEventListener('click', () => upvoteReview(review._id));
         reviewsContainer.appendChild(reviewItem);
     });
 }
@@ -194,9 +223,8 @@ async function upvoteReview(reviewId) {
         });
 
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Error response:', errorText); // Log the error response
-            throw new Error('Failed to upvote review');
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.message || 'Failed to upvote review');
         }
 
         alert('Review upvoted successfully.');

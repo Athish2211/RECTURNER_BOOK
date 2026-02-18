@@ -9,61 +9,65 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Function to fetch books for the homepage from multiple genres
+// Function to fetch books for the homepage from multiple genres (via server proxy using .env key)
 async function fetchBooksFromGoogle() {
-    const genres = ['fiction', 'mystery', 'fantasy', 'romance', 'biography'];
-    const apiKey = 'AIzaSyB_cCice-LLGG8DHOJsMLTgEFb45moca80';
+    const genres = ['subject:fiction', 'subject:mystery', 'subject:fantasy', 'subject:romance', 'subject:biography'];
+    const genreLabels = { 'subject:fiction': 'Fiction', 'subject:mystery': 'Mystery', 'subject:fantasy': 'Fantasy', 'subject:romance': 'Romance', 'subject:biography': 'Biography' };
     const booksByGenre = {};
 
     try {
         for (const genre of genres) {
-            const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(genre)}&maxResults=8&key=${apiKey}`);
-            if (!response.ok) throw new Error('Network response was not ok');
-
+            const response = await fetch(`/api/books/google?q=${encodeURIComponent(genre)}&maxResults=8`);
+            if (!response.ok) {
+                const err = await response.json().catch(() => ({ message: response.statusText }));
+                throw new Error(err.message || 'Network response was not ok');
+            }
             const data = await response.json();
-            booksByGenre[genre] = data.items || [];
+            booksByGenre[genre] = (data.items || []).filter(Boolean);
         }
-
-        displayBooks(booksByGenre); // Display books returned by the API
+        displayBooks(booksByGenre, genreLabels);
     } catch (error) {
         console.error('Error fetching books:', error);
-        alert('Failed to fetch books. Please try again.');
+        alert(error.message || 'Failed to fetch books. Please try again.');
     }
 }
 
-// Function to search for books
+// Function to search for books (via server proxy)
 async function searchBooks(query) {
     try {
-        const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=12`);
-        if (!response.ok) throw new Error('Network response was not ok');
-
+        const response = await fetch(`/api/books/google?q=${encodeURIComponent(query)}&maxResults=12`);
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({ message: response.statusText }));
+            throw new Error(err.message || 'Network response was not ok');
+        }
         const data = await response.json();
-        const books = data.items || [];
-
-        displaySearchResults(books); // Display search results
+        displaySearchResults(data.items || []);
     } catch (error) {
         console.error('Error searching for books:', error);
-        alert('Failed to search for books. Please try again.');
+        alert(error.message || 'Failed to search for books. Please try again.');
     }
 }
 
 // Function to display books by genre
-function displayBooks(booksByGenre) {
+function displayBooks(booksByGenre, genreLabels) {
     const booksContainer = document.getElementById('books-container');
-    booksContainer.innerHTML = ''; // Clear previous results
+    booksContainer.innerHTML = '';
 
     for (const genre in booksByGenre) {
+        const items = booksByGenre[genre];
+        if (!items || items.length === 0) continue;
+
         const genreSection = document.createElement('div');
         genreSection.classList.add('genre-section');
-
+        const label = (genreLabels && genreLabels[genre]) || genre.replace(/^subject:/, '').replace(/\b\w/g, c => c.toUpperCase());
         const genreTitle = document.createElement('h2');
-        genreTitle.textContent = genre.charAt(0).toUpperCase() + genre.slice(1);
+        genreTitle.textContent = label;
         genreSection.appendChild(genreTitle);
 
         const genreBooksContainer = document.createElement('div');
         genreBooksContainer.classList.add('genre-books-container');
 
-        booksByGenre[genre].forEach(book => {
+        items.forEach(book => {
             const bookItem = document.createElement('div');
             bookItem.classList.add('book-container');
 
@@ -141,16 +145,16 @@ async function addToWantToRead(book) {
     const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
 
     if (!loggedInUser) {
-        alert('You must be logged in to add books to your list.');
-        window.location.href = '/pages/login.html'; // Redirect to login page if not logged in
+        window.location.replace('/pages/login.html');
         return;
     }
 
+    const authors = book.volumeInfo.authors;
     const userBook = {
         userId: loggedInUser._id,
         bookId: book.id,
         title: book.volumeInfo.title,
-        authors: book.volumeInfo.authors?.join(', ') || 'Unknown',
+        authors: Array.isArray(authors) ? authors : (authors ? [String(authors)] : ['Unknown']),
         thumbnail: book.volumeInfo.imageLinks?.thumbnail || 'default-thumbnail.jpg'
     };
 
@@ -162,9 +166,8 @@ async function addToWantToRead(book) {
         });
 
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Error response:', errorText); // Debugging statement
-            throw new Error('Failed to save book');
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.message || 'Failed to save book');
         }
 
         alert(`${userBook.title} added to your books.`);

@@ -1,72 +1,41 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
-    if (!loggedInUser) {
-        alert('You must be logged in to view your books.');
-        window.location.href = '/pages/login.html'; // Redirect to login if not logged in
+    if (!loggedInUser || !loggedInUser._id) {
+        window.location.replace('/pages/login.html');
         return;
     }
 
     const yourBooksContainer = document.getElementById('your-books-container');
-    const yourBooks = JSON.parse(localStorage.getItem(`yourBooks-${loggedInUser.email}`)) || [];
-
-    yourBooksContainer.innerHTML = '';
-    if (yourBooks.length === 0) {
-        yourBooksContainer.innerHTML = '<p>No books in your list. Start adding some!</p>';
-        return;
-    }
-
-    yourBooks.forEach(book => {
-        const bookItem = document.createElement('div');
-        bookItem.classList.add('book-item');
-
-        bookItem.innerHTML = `
-            <img src="${book.thumbnail}" alt="${book.title}" />
-            <h3>${book.title}</h3>
-            <p>By ${book.authors?.join(', ') || 'Unknown'}</p>
-            <button class="want-to-read-btn" data-id="${book.bookId}">Want to Read</button>
-        `;
-
-        bookItem.querySelector('.want-to-read-btn').addEventListener('click', () => {
-            addToWantToRead(book);
-        });
-
-        yourBooksContainer.appendChild(bookItem);
-    });
-});
-
-async function addToWantToRead(book) {
-    const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
-
-    if (!loggedInUser) {
-        alert('You must be logged in to add books to your list.');
-        window.location.href = '/pages/login.html'; // Redirect to login page if not logged in
-        return;
-    }
-
-    const userBook = {
-        userId: loggedInUser._id,
-        bookId: book.bookId,
-        title: book.title,
-        authors: book.authors,
-        thumbnail: book.thumbnail
-    };
+    yourBooksContainer.innerHTML = '<p>Loading your books...</p>';
 
     try {
-        const response = await fetch('/api/user-books', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(userBook),
-        });
+        const response = await fetch(`/api/user-books/${loggedInUser._id}`);
+        if (!response.ok) throw new Error('Failed to load books');
+        const yourBooks = await response.json();
+        yourBooksContainer.innerHTML = '';
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Error response:', errorText); // Debugging statement
-            throw new Error('Failed to save book');
+        if (!yourBooks.length) {
+            yourBooksContainer.innerHTML = '<p>No books in your list. Start adding some from Home or Search!</p>';
+            return;
         }
 
-        alert(`${userBook.title} added to your books.`);
-    } catch (error) {
-        console.error('Error saving book:', error);
-        alert('Failed to save book. Please try again.');
+        yourBooks.forEach(book => {
+            const bookItem = document.createElement('div');
+            bookItem.classList.add('book-item');
+            const title = (book.title && String(book.title).trim()) || 'Unknown';
+            const authors = Array.isArray(book.authors) ? book.authors.join(', ') : (book.authors != null ? String(book.authors) : 'Unknown');
+            const thumb = book.thumbnail || 'default-thumbnail.jpg';
+            const bid = (book.bookId != null && book.bookId !== '') ? String(book.bookId) : '';
+            bookItem.innerHTML = `
+                <img src="${thumb}" alt="${title}" />
+                <h3>${title}</h3>
+                <p>By ${authors}</p>
+                ${bid ? `<a href="../pages/review.html?bookId=${encodeURIComponent(bid)}" class="view-details-link">View Details</a>` : ''}
+            `;
+            yourBooksContainer.appendChild(bookItem);
+        });
+    } catch (err) {
+        console.error('Error loading your books:', err);
+        yourBooksContainer.innerHTML = '<p>Failed to load your books. Please try again.</p>';
     }
-}
+});

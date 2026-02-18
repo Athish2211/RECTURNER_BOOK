@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
@@ -49,11 +50,27 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Connect to MongoDB
 mongoose.connect('mongodb://localhost:27017/recturner_book')
-.then(() => console.log('MongoDB connected'))
-.catch(err => console.error('MongoDB connection error:', err));
+    .then(() => console.log('MongoDB connected'))
+    .catch(err => console.error('MongoDB connection error:', err));
 
-// Start the server
-const PORT = process.env.PORT || 5001; // Use environment variable or default port
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+// Start the server (try next port if default is in use)
+const PORT = process.env.PORT || 5001;
+const MAX_PORT = 5010;
+function tryListen(port) {
+    if (port > MAX_PORT) {
+        console.error(`No available port between ${PORT} and ${MAX_PORT}`);
+        return;
+    }
+    const server = app.listen(port, () => {
+        console.log(`Server is running on port ${port}`);
+    });
+    server.on('error', (err) => {
+        if (err.code === 'EADDRINUSE') {
+            console.error(`Port ${port} in use, trying ${port + 1}...`);
+            tryListen(port + 1);
+        } else {
+            console.error('Server error:', err.message);
+        }
+    });
+}
+tryListen(Number(PORT) || 5001);

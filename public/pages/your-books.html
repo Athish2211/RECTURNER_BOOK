@@ -82,7 +82,9 @@
     </style>
 </head>
 <body>
-
+    <script>
+        (function(){ if (!localStorage.getItem('loggedInUser')) { window.location.replace('/pages/login.html'); return; } })();
+    </script>
     <div class="navbar">
         <a href="../pages/homepage.html"><div class="logo">Recturner</div></a>
         <div class="nav-links">
@@ -91,6 +93,7 @@
             <a href="../pages/your-books.html">Your Books</a>
             <a href="../pages/about.html">About</a>
             <a href="../pages/signup.html">Sign Up</a>
+            <a href="#" id="logout-btn" class="logout-link">Logout</a>
         </div>
         <div class="search-container">
             <input type="text" id="search-input" placeholder="Explore New Books">
@@ -106,5 +109,18 @@
 
     <script src="../js/search.js"></script>
     <script src="../js/your-books.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) logoutBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                localStorage.removeItem('loggedInUser');
+                window.location.replace('/pages/login.html');
+            });
+        });
+        window.addEventListener('pageshow', function() {
+            if (!localStorage.getItem('loggedInUser')) window.location.replace('/pages/login.html');
+        });
+    </script>
 </body>
 </html>
